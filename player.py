@@ -1,6 +1,7 @@
 import pygame
+import math
 from circleshape import CircleShape
-from constants import PLAYER_RADIUS
+from constants import PLAYER_RADIUS, PLAYER_TURN_SPEED
 
 
 class Player(CircleShape):
@@ -18,3 +19,42 @@ class Player(CircleShape):
     
     def draw(self, screen):
         pygame.draw.polygon(screen, "white", self.triangle(), 2)
+    
+    # def rotate(self, dt):
+    #     self.rotation += PLAYER_TURN_SPEED * dt
+    
+    # def update(self, dt):
+    #     keys = pygame.key.get_pressed()
+
+    #     if keys[pygame.K_a]:
+    #         self.rotate(- dt)
+    #     if keys[pygame.K_d]:
+    #         self.rotate(dt)
+
+    def update(self, dt):
+        # Get the mouse position
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        
+        # Calculate the angle between ship and mouse
+        dx = mouse_x - self.position.x
+        dy = mouse_y - self.position.y
+        
+        # Calculate target angle in degrees
+        target_angle = math.degrees(math.atan2(dy, dx)) - 90
+        
+        # Calculate the difference between current and target angle
+        # This handles angle wrapping correctly
+        angle_diff = (target_angle - self.rotation + 180) % 360 - 180
+        
+        # Calculate maximum rotation this frame based on turn speed
+        max_rotation = PLAYER_TURN_SPEED * dt
+        
+        # Limit rotation to max speed
+        if abs(angle_diff) > max_rotation:
+            if angle_diff > 0:
+                self.rotation += max_rotation
+            else:
+                self.rotation -= max_rotation
+        else:
+            # If we're close enough, just set to target
+            self.rotation = target_angle
