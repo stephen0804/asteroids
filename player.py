@@ -1,13 +1,18 @@
 import pygame
 import math
 from circleshape import CircleShape
-from constants import PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_SPEED
+from shot import Shot
+from constants import PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOT_SPEED
 
 
 class Player(CircleShape):
     def __init__(self, x, y):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
+
+        # autofire code
+        self.ticks_since_last_shot = 0
+        self.shots_per_second = 2  # Adjust this number to control firing rate
 
     def triangle(self):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
@@ -39,6 +44,8 @@ class Player(CircleShape):
     #         self.move(dt)
     #     if keys[pygame.K_s]:
     #         self.move(- dt)
+    #     if keys[pygame.K_SPACE]:
+    #         self.shoot()
 
 
     def update(self, dt):
@@ -69,3 +76,15 @@ class Player(CircleShape):
             # If we're close enough, just set to target
             self.rotation = target_angle
         self.move(dt)
+        
+        # Increment the tick counter
+        self.ticks_since_last_shot += 1
+    
+        # Auto-fire logic
+        if self.ticks_since_last_shot >= 60 / self.shots_per_second:
+            self.shoot()
+            self.ticks_since_last_shot = 0  # Reset the counter
+
+    def shoot(self):
+        shot = Shot(self.position.x, self.position.y)
+        shot.velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOT_SPEED
