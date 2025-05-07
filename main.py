@@ -45,7 +45,7 @@ def main():
             for s in shots:
                 if s.colliding(a):
                     s.kill()
-                    a.kill()
+                    a.split()
 
         for object in drawable:
             object.draw(screen)
